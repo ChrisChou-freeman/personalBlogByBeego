@@ -1,0 +1,5 @@
+<div class="blog-post">
+    <h3 class="blog-post-title">{{.Article.ArticleName}}</h3>
+    <p class="blog-post-meta">{{date .Article.CreateTime "Y-m-d H:i:s"}} Type <a href="#">{{.Article.ArticleType.TypeName}}</a></p>
+    {{str2html .Article.ArticleContent.Content}}
+</div><!-- /.blog-post -->

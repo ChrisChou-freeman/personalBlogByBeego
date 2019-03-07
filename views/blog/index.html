@@ -1,0 +1,18 @@
+{{range $index, $article := .ArticleList}}
+  <div class="blog-post">
+    <h3 class="blog-post-title">{{$article.ArticleName}}</h3>
+    <p class="blog-post-meta">{{date $article.CreateTime "Y-m-d H:i:s"}} Type <a href="#">{{$article.ArticleType.TypeName}}</a></p>
+    {{$content := $article.ArticleContent.Content}}
+    {{$content | reContent}} <a href="/articleconten?articleid={{$article.Id}}">more</a>
+  </div><!-- /.blog-post -->
+{{end}}
+
+<nav aria-label="Page navigation example">
+  <ul class="pagination">
+    {{str2html .pageLimit}}
+  </ul>
+</nav>
+<!-- <nav class="blog-pagination">
+  <a class="btn btn-outline-primary" href="#">Older</a>
+  <a class="btn btn-outline-secondary disabled" href="#">Newer</a>
+</nav> -->
