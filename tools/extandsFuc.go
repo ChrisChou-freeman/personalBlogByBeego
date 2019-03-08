@@ -69,5 +69,10 @@ func LimitPage(CurreentPage, AllCount int, FilterArgs, url string) (string, int,
 	}
 	htmlList = append(htmlList, next)
 	data := strings.Join(htmlList, "")
-	return data, start, stop
+
+	dataStart := 0
+	dataStop := 0
+	dataStart = (CurreentPage - 1) * pageCount.(int)
+	dataStop = pageCount.(int)
+	return data, dataStart, dataStop
 }

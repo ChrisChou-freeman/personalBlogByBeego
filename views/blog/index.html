@@ -1,9 +1,10 @@
+{{$islogin := .isLogin}}
 {{range $index, $article := .ArticleList}}
   <div class="blog-post">
     <h3 class="blog-post-title">{{$article.ArticleName}}</h3>
-    <p class="blog-post-meta">{{date $article.CreateTime "Y-m-d H:i:s"}} Type <a href="#">{{$article.ArticleType.TypeName}}</a></p>
+    <p class="blog-post-meta">{{date $article.CreateTime "Y-m-d H:i:s"}} Type <a href="#">{{$article.ArticleType.TypeName}}{{if $islogin}} |  <a href='{{urlfor "ArticleEditorController.Get"}}?articleid={{$article.Id}}'>Editor</a> {{end}}</p>
     {{$content := $article.ArticleContent.Content}}
-    {{$content | reContent}} <a href="/articleconten?articleid={{$article.Id}}">more</a>
+    {{$content | reContent}} <a href='{{urlfor "ArticleContentController.Get"}}?articleid={{$article.Id}}'>more</a>
   </div><!-- /.blog-post -->
 {{end}}
 

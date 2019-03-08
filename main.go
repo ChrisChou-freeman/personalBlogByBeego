@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
@@ -29,26 +28,6 @@ func init() {
 }
 
 func main() {
-	o := orm.NewOrm()
-	o.Using("default")
-	qb, _ := orm.NewQueryBuilder("mysql")
-	qb.Select("DATE_FORMAT(create_time, '%Y-%m-%d') as mytime, count(Id) as num").From("article").GroupBy("mytime").Limit(10)
-	// fmt.Println(qb.String())
-	qs := qb.String()
-	blogDateList := []orm.Params{}
-	o.Raw(qs).Values(&blogDateList)
-	fmt.Println(blogDateList)
-	mytime, _ := time.Parse("2006/01/02", "2019/03/05")
-	valueList := []orm.Params{}
-	o.QueryTable("Article").Filter("CreateTime__gt", mytime).Values(&valueList, "CreateTime")
-	fmt.Println(mytime)
-	fmt.Println(valueList)
-	//article := []orm.Params{}
-	//o.QueryTable("Article").GroupBy("ArticleType").Values(&article, "ArticleType")
-	for _, item := range blogDateList {
-		fmt.Println(item)
-	}
-	// fmt.Println(article)
 	tools.Mycommands(orm.RunCommand)
 	beego.Run()
 }

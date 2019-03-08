@@ -67,10 +67,12 @@ func (c *AccountController) Post() {
 	}
 }
 
+// SignOutController 退出登录
 type SignOutController struct {
 	beego.Controller
 }
 
+// Get 退出登录
 func (c *SignOutController) Get() {
 	c.DestroySession()
 	url := beego.URLFor("AccountController.Get")

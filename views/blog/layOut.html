@@ -23,7 +23,7 @@
       <header class="blog-header py-3">
         <div class="row flex-nowrap justify-content-between align-items-center">
           <div class="col-4 pt-1">
-            <a class="text-muted" href="#">个人博客</a>
+            <a class="text-muted" href="/">个人博客</a>
           </div>
           <div class="col-4 text-center">
             <a class="blog-header-logo text-dark" href="#">Space Cowboy</a>
@@ -38,7 +38,7 @@
                   {{.userName}}
                 </button>
                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                  <a class="dropdown-item" href="/article_editor">新建</a>
+                  <a class="dropdown-item" href='{{urlfor "ArticleAddController.Get"}}'>新建</a>
                   <a class="dropdown-item" href="#">管理</a>
                   <a class="dropdown-item" href="/signout">注销</a>
                 </div>
@@ -53,8 +53,9 @@
 
       <div class="nav-scroller py-1 mb-2">
         <nav class="nav d-flex justify-content-between">
+          <a class="p-2 text-muted" href="/">全部</a>
           {{range $index, $item := .typelist}}
-          <a class="p-2 text-muted" href="#" data-id="{{$item.Id}}">{{$item.TypeName}}</a>
+          <a class="p-2 text-muted" href="/?articletype={{$item.Id}}">{{$item.TypeName}}</a>
           {{end}}
           
         </nav>
@@ -71,37 +72,25 @@
 
         <aside class="col-md-4 blog-sidebar">
           <div class="p-3 mb-3 bg-light rounded">
-            <h4 class="font-italic">关于</h4>
+            <h4 class="font-italic">About</h4>
             <p class="mb-0">次网站基于beego搭建</p>
           </div>
 
           <div class="p-3">
-            <h4 class="font-italic">日期</h4>
+            <h4 class="font-italic">Date</h4>
             <ol class="list-unstyled mb-0">
               {{range $index, $item := .blogDateList}}
-              <li><a href="#">{{index $item "mytime"}}  ({{index $item "num"}})</a></li>
+              <li><a href='/?searchdate={{index $item "mytime"}}'>{{index $item "mytime"}}  ({{index $item "num"}})</a></li>
               {{end}}
-              <!-- <li><a href="#">March 2014</a></li>
-              <li><a href="#">February 2014</a></li>
-              <li><a href="#">January 2014</a></li>
-              <li><a href="#">December 2013</a></li>
-              <li><a href="#">November 2013</a></li>
-              <li><a href="#">October 2013</a></li>
-              <li><a href="#">September 2013</a></li>
-              <li><a href="#">August 2013</a></li>
-              <li><a href="#">July 2013</a></li>
-              <li><a href="#">June 2013</a></li>
-              <li><a href="#">May 2013</a></li>
-              <li><a href="#">April 2013</a></li> -->
             </ol>
           </div>
 
           <div class="p-3 bg-light">
-            <h4 class="font-italic">信息</h4>
+            <h4 class="font-italic">Information</h4>
             <ol class="list-unstyled">
+              <li>Name: ChrisChou</li>
+              <li>Email: 1050434689@qq.com</li>
               <li><a href="#">GitHub</a></li>
-              <li><a href="#">Twitter</a></li>
-              <li><a href="#">Facebook</a></li>
             </ol>
           </div>
         </aside><!-- /.blog-sidebar -->

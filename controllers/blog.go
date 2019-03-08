@@ -10,7 +10,6 @@ import (
 	"github.com/astaxie/beego/orm"
 
 	"MyblogByGo/models"
-	"MyblogByGo/tools"
 )
 
 // ReturnData 返回数据结构体
@@ -18,74 +17,6 @@ type ReturnData struct {
 	Status  bool
 	Data    string
 	Message string
-}
-
-// IndexController 主页面的入口
-type IndexController struct {
-	beego.Controller
-}
-
-// IsLogin 确认登录
-func (c *IndexController) IsLogin() bool {
-	islogin := c.GetSession("isLogin")
-	//fmt.Println("sessionValue", islogin)
-	if islogin != nil && islogin == true {
-		return true
-	}
-	return false
-}
-
-// Get 博客主页
-func (c *IndexController) Get() {
-	o := orm.NewOrm()
-	typeList := []*models.ArticleType{}
-	articleList := []*models.Article{}
-	articleListQs := o.QueryTable("Article").RelatedSel("ArticleContent", "ArticleType")
-	dataCount, _ := o.QueryTable("Article").Count()
-
-	page := c.Input().Get("page")
-	pint, err := strconv.Atoi(page)
-	if err != nil {
-		pint = 1
-	}
-	pageLimit, start, stop := tools.LimitPage(pint, int(dataCount), "", "/")
-	articleListQs.Limit(stop, start-1)
-	c.Data["pageLimit"] = pageLimit
-
-	qb, _ := orm.NewQueryBuilder("mysql")
-	qb.Select("DATE_FORMAT(create_time, '%Y-%m') as mytime, count(Id) as num").From("article").GroupBy("mytime").Limit(10)
-	// fmt.Println(qb.String())
-	qs := qb.String()
-	blogDateList := []orm.Params{}
-	if _, err := o.Raw(qs).Values(&blogDateList); err == nil {
-		c.Data["blogDateList"] = &blogDateList
-	} else {
-		fmt.Println(err)
-	}
-
-	if _, err := o.QueryTable("ArticleType").All(&typeList); err == nil {
-		c.Data["typelist"] = &typeList
-	} else {
-		fmt.Println(err)
-	}
-	if _, err := articleListQs.All(&articleList); err == nil {
-		c.Data["ArticleList"] = &articleList
-	} else {
-		fmt.Println(err)
-	}
-	if v := c.IsLogin(); v {
-		userId := c.GetSession("userId")
-		user := models.User{
-			Id: userId.(int),
-		}
-		o.Read(&user)
-		c.Data["isLogin"] = true
-		c.Data["userName"] = user.Name
-	}
-	c.Layout = "blog/layOut.html"
-	c.TplName = "blog/index.html"
-	c.LayoutSections = make(map[string]string)
-	c.LayoutSections["indexTitle"] = "blog/indexTitle.html"
 }
 
 // ArticleAddController 添加文章
@@ -103,7 +34,7 @@ func (c *ArticleAddController) IsLogin() bool {
 	return false
 }
 
-// Get 后去添加文章页面
+// Get 添加文章页面
 func (c *ArticleAddController) Get() {
 	if v := c.IsLogin(); !v {
 		url := c.URLFor("AccountController.Get")
@@ -210,7 +141,17 @@ func (c *ArticleContentController) Get() {
 	if err != nil {
 		aid = 1
 	}
-	fmt.Println("articleid", aid)
+
+	qb, _ := orm.NewQueryBuilder("mysql")
+	qb.Select("DATE_FORMAT(create_time, '%Y-%m') as mytime, count(Id) as num").From("article").GroupBy("mytime").Limit(10)
+	qs := qb.String()
+	blogDateList := []orm.Params{}
+	if _, err := o.Raw(qs).Values(&blogDateList); err == nil {
+		c.Data["blogDateList"] = &blogDateList
+	} else {
+		fmt.Println(err)
+	}
+
 	article := new(models.Article)
 	article.Id = aid
 	qerr := o.Read(article)
@@ -225,11 +166,138 @@ func (c *ArticleContentController) Get() {
 		type Data struct {
 			ArticleName string
 		}
-		c.Data["Article"] = Data{ArticleName: "文章读取错误"}
+		c.Data["Article"] = &Data{ArticleName: "文章读取错误"}
 	} else {
 		c.Data["Article"] = article
 	}
 	c.Data["typelist"] = &typeList
 	c.Layout = "blog/layOut.html"
 	c.TplName = "blog/articleContent.html"
+}
+
+// ArticleEditorController 编辑文章
+type ArticleEditorController struct {
+	beego.Controller
+}
+
+// IsLogin 确认登录结构体
+func (c *ArticleEditorController) IsLogin() bool {
+	islogin := c.GetSession("isLogin")
+	fmt.Println("sessionValue", islogin)
+	if islogin != nil && islogin == true {
+		return true
+	}
+	return false
+}
+
+// Get 获取文章编辑页面
+func (c *ArticleEditorController) Get() {
+	c.Data["xsrf_token"] = c.XSRFToken()
+	articleId := c.Input().Get("articleid")
+	aId, _ := strconv.Atoi(articleId)
+	article := new(models.Article)
+	article.Id = aId
+	o := orm.NewOrm()
+	o.Using("default")
+	qerr := o.Read(article, "Id")
+	if qerr != nil {
+		type Data struct {
+			ArticleName string
+		}
+		c.Data["Article"] = &Data{ArticleName: "文章读取错误"}
+	} else {
+		o.LoadRelated(article, "ArticleContent", "ArticleType")
+	}
+
+	typeList := []*models.ArticleType{}
+	if _, err := o.QueryTable("ArticleType").All(&typeList); err == nil {
+		c.Data["typelist"] = &typeList
+	} else {
+		fmt.Println(err)
+	}
+	c.Data["posturl"] = c.URLFor("ArticleEditorController.Post")
+	c.Data["Article"] = article
+	c.TplName = "blog/articleEditor.html"
+}
+
+// articleForm 文章更新form
+type articleEditorForm struct {
+	Id             int
+	ArticleName    string
+	ArticleType    int
+	ArticleContent string
+}
+
+// Post 提交编辑文章内容
+func (c *ArticleEditorController) Post() {
+	if v := c.IsLogin(); !v {
+		url := c.URLFor("AccountController.Get")
+		c.Redirect(url, 302)
+	}
+	rd := ReturnData{
+		Status:  true,
+		Data:    "",
+		Message: "",
+	}
+	af := articleEditorForm{}
+	fmt.Println(string(c.Ctx.Input.RequestBody))
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &af); err != nil {
+		rd.Status = false
+		rd.Message = "文章提交出错"
+	} else {
+		o := orm.NewOrm()
+		o.Using("default")
+		article := new(models.Article)
+		articleContent := new(models.ArticleContent)
+		articleType := new(models.ArticleType)
+		articleName := af.ArticleName
+		articleName = strings.Replace(articleName, " ", "", -1)
+		article.Id = af.Id
+		if articleName == "" {
+			rd.Status = false
+			rd.Message = "文章标题为空"
+		}
+		if af.ArticleType != 0 {
+			articleType.Id = af.ArticleType
+			if err := o.Read(articleType); err != nil {
+				rd.Status = false
+				rd.Message = "文章类型错误"
+			}
+			article.ArticleType = articleType
+		} else {
+			rd.Status = false
+			rd.Message = "类型为空"
+		}
+
+		articleData := af.ArticleContent
+		articleData = strings.Replace(articleData, " ", "", -1)
+		articleData = strings.Replace(articleData, "/n", "", -1)
+		if articleData == "" {
+			rd.Status = false
+			rd.Message = "文章内容为空"
+		}
+		if rd.Status {
+			rerr := o.Read(article, "Id")
+			if rerr != nil {
+				fmt.Println(article.Id)
+				rd.Status = false
+				rd.Message = "找不到文章"
+			} else {
+				article.ArticleName = af.ArticleName
+				article.ArticleType = articleType
+				_, aerr := o.Update(article)
+				o.QueryTable("ArticleContent").Filter("Article__id", article.Id).One(articleContent)
+				articleContent.Content = af.ArticleContent
+				_, cerr := o.Update(articleContent)
+				if aerr != nil || cerr != nil {
+					rd.Status = false
+					rd.Message = "文章提交出错"
+					o.Rollback()
+				}
+			}
+		}
+		rdJSON, _ := json.Marshal(rd)
+		c.Data["json"] = string(rdJSON)
+		c.ServeJSON()
+	}
 }

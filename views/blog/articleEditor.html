@@ -23,8 +23,7 @@
 <div class="row" style="padding-top: 0px;">
         <div class="col-md-6">
                 <div class="input-group">
-                    <input type="text" class="form-control article_title" placeholder="输入文章标题" aria-describedby="basic-addon2" value="">
-                    <!-- <span class="input-group-addon" id="basic-addon2">标题  </span> -->
+                    <input type="text" class="form-control article_title" placeholder="输入文章标题" aria-describedby="basic-addon2" value="{{.Article.ArticleName}}">
                 </div>
         </div>
         <div class="col-md-6">
@@ -33,37 +32,26 @@
     <div id="div1" class="toolbar">
     </div>
     <div id="editor" class="text">
+        {{str2html .Article.ArticleContent.Content}}
         <!-- 文章内容区域 -->
     </div>
-    <!-- <div class="row">
-        <div class="col-md-6 row">
-            <div class="col-md-3">
-                <label class="form-control">选择分类</label>
-            </div>
-            <div class="col-md-9">
-                <select class="form-control article_type">
-                    <option value="" selected>选择</option>
-                </select>
-            </div>
-            
-            
-        </div>
-        <div class="col-md-6">
-    
-        </div>
-    </div> -->
     <div class="input-group mb-3">
         <div class="input-group-prepend">
           <label class="input-group-text" for="inputGroupSelect01">分类</label>
         </div>
         <select class="custom-select article_type" id="inputGroupSelect01">
             <option selected >选择分类</option>
+            {{$article := .Article}}
             {{range $index, $item := .typelist}}
-            <option value="{{$item.Id}}">{{$item.TypeName}}</option>
+                {{if eq $article.ArticleType.Id $item.Id}}
+                    <option value="{{$item.Id}}" selected>{{$item.TypeName}}</option>
+                {{else}}
+                    <option value="{{$item.Id}}">{{$item.TypeName}}</option>
+                {{end}}
             {{end}}
         </select>
       </div>      
-    <button type="button" class="btn btn-primary submit_btn" article-id="">提交</button> 
+    <button type="button" class="btn btn-primary submit_btn" article-id="{{.Article.Id}}">提交</button> 
     <br>
     <br>
     <!-- <script src="/static/jquery.js"></script> -->
@@ -116,14 +104,9 @@
                     "ArticleType": Number(article_type),
                     "ArticleContent": article_content,
                 }
-                var test_data = {
-                    "ArticleName": "",
-                    "ArticleType": 0,
-                    "ArticleContent": "",
-                }
                 var article_id = $(this).attr('article-id')
                 if(article_id){
-                    post_data['article_id'] = article_id
+                    post_data['Id'] = Number(article_id)
                 }
                 if(article_title && article_content){
                     $.ajax({
