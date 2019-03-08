@@ -54,9 +54,77 @@ func (c *ArticleAddController) Get() {
 }
 
 type articleForm struct {
+	Id             int
 	ArticleName    string
 	ArticleType    int
 	ArticleContent string
+}
+
+func ArticleEditorFuc(editorMod string, rd *ReturnData, af articleForm) {
+	o := orm.NewOrm()
+	o.Using("default")
+	article := new(models.Article)
+	articleContent := new(models.ArticleContent)
+	articleType := new(models.ArticleType)
+	articleName := af.ArticleName
+	articleName = strings.Replace(articleName, " ", "", -1)
+	if articleName == "" {
+		rd.Status = false
+		rd.Message = "文章标题为空"
+	}
+	if af.ArticleType != 0 {
+		articleType.Id = af.ArticleType
+		if err := o.Read(articleType); err != nil {
+			rd.Status = false
+			rd.Message = "文章类型错误"
+		}
+	} else {
+		rd.Status = false
+		rd.Message = "类型为空"
+	}
+	articleData := af.ArticleContent
+	articleData = strings.Replace(articleData, " ", "", -1)
+	articleData = strings.Replace(articleData, "/n", "", -1)
+	if articleData == "" {
+		rd.Status = false
+		rd.Message = "文章内容为空"
+	}
+	if rd.Status {
+		if editorMod == "insert" {
+			article.ArticleName = articleName
+			article.ArticleType = articleType
+			articleContent.Content = articleData
+			article.ArticleContent = articleContent
+			_, acerr := o.Insert(articleContent)
+			_, aerr := o.Insert(article)
+			if acerr != nil || aerr != nil {
+				rd.Status = false
+				rd.Message = "文章提交出错"
+				o.Rollback()
+			}
+		} else if editorMod == "update" {
+			article.Id = af.Id
+			rerr := o.Read(article, "Id")
+			if rerr != nil {
+				fmt.Println(article.Id)
+				rd.Status = false
+				rd.Message = "找不到文章"
+			} else {
+				article.ArticleName = af.ArticleName
+				article.ArticleType = articleType
+				_, aerr := o.Update(article)
+				o.QueryTable("ArticleContent").Filter("Article__id", article.Id).One(articleContent)
+				articleContent.Content = af.ArticleContent
+				_, cerr := o.Update(articleContent)
+				if aerr != nil || cerr != nil {
+					rd.Status = false
+					rd.Message = "文章提交出错"
+					o.Rollback()
+				}
+			}
+		}
+	}
+
 }
 
 // Post 提交文章
@@ -71,55 +139,12 @@ func (c *ArticleAddController) Post() {
 		Message: "",
 	}
 	af := articleForm{}
-	fmt.Println(string(c.Ctx.Input.RequestBody))
+	// fmt.Println(string(c.Ctx.Input.RequestBody))
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &af); err != nil {
 		rd.Status = false
 		rd.Message = "文章提交出错"
 	} else {
-		o := orm.NewOrm()
-		o.Using("default")
-		article := new(models.Article)
-		articleContent := new(models.ArticleContent)
-		articleType := new(models.ArticleType)
-		articleName := af.ArticleName
-		articleName = strings.Replace(articleName, " ", "", -1)
-		if articleName != "" {
-			article.ArticleName = articleName
-		} else {
-			rd.Status = false
-			rd.Message = "文章标题为空"
-		}
-		if af.ArticleType != 0 {
-			articleType.Id = af.ArticleType
-			if err := o.Read(articleType); err != nil {
-				rd.Status = false
-				rd.Message = "文章类型错误"
-			}
-			article.ArticleType = articleType
-		} else {
-			rd.Status = false
-			rd.Message = "类型为空"
-		}
-		articleData := af.ArticleContent
-		articleData = strings.Replace(articleData, " ", "", -1)
-		articleData = strings.Replace(articleData, "/n", "", -1)
-		if articleData != "" {
-			articleContent.Content = articleData
-			article.ArticleContent = articleContent
-		} else {
-			rd.Status = false
-			rd.Message = "文章内容为空"
-		}
-		if rd.Status {
-			fmt.Println(articleContent)
-			_, acerr := o.Insert(articleContent)
-			_, aerr := o.Insert(article)
-			if acerr != nil || aerr != nil {
-				rd.Status = false
-				rd.Message = "文章提交出错"
-				o.Rollback()
-			}
-		}
+		ArticleEditorFuc("insert", &rd, af)
 		rdJSON, _ := json.Marshal(rd)
 		c.Data["json"] = string(rdJSON)
 		c.ServeJSON()
@@ -220,14 +245,6 @@ func (c *ArticleEditorController) Get() {
 	c.TplName = "blog/articleEditor.html"
 }
 
-// articleForm 文章更新form
-type articleEditorForm struct {
-	Id             int
-	ArticleName    string
-	ArticleType    int
-	ArticleContent string
-}
-
 // Post 提交编辑文章内容
 func (c *ArticleEditorController) Post() {
 	if v := c.IsLogin(); !v {
@@ -239,63 +256,13 @@ func (c *ArticleEditorController) Post() {
 		Data:    "",
 		Message: "",
 	}
-	af := articleEditorForm{}
+	af := articleForm{}
 	fmt.Println(string(c.Ctx.Input.RequestBody))
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &af); err != nil {
 		rd.Status = false
 		rd.Message = "文章提交出错"
 	} else {
-		o := orm.NewOrm()
-		o.Using("default")
-		article := new(models.Article)
-		articleContent := new(models.ArticleContent)
-		articleType := new(models.ArticleType)
-		articleName := af.ArticleName
-		articleName = strings.Replace(articleName, " ", "", -1)
-		article.Id = af.Id
-		if articleName == "" {
-			rd.Status = false
-			rd.Message = "文章标题为空"
-		}
-		if af.ArticleType != 0 {
-			articleType.Id = af.ArticleType
-			if err := o.Read(articleType); err != nil {
-				rd.Status = false
-				rd.Message = "文章类型错误"
-			}
-			article.ArticleType = articleType
-		} else {
-			rd.Status = false
-			rd.Message = "类型为空"
-		}
-
-		articleData := af.ArticleContent
-		articleData = strings.Replace(articleData, " ", "", -1)
-		articleData = strings.Replace(articleData, "/n", "", -1)
-		if articleData == "" {
-			rd.Status = false
-			rd.Message = "文章内容为空"
-		}
-		if rd.Status {
-			rerr := o.Read(article, "Id")
-			if rerr != nil {
-				fmt.Println(article.Id)
-				rd.Status = false
-				rd.Message = "找不到文章"
-			} else {
-				article.ArticleName = af.ArticleName
-				article.ArticleType = articleType
-				_, aerr := o.Update(article)
-				o.QueryTable("ArticleContent").Filter("Article__id", article.Id).One(articleContent)
-				articleContent.Content = af.ArticleContent
-				_, cerr := o.Update(articleContent)
-				if aerr != nil || cerr != nil {
-					rd.Status = false
-					rd.Message = "文章提交出错"
-					o.Rollback()
-				}
-			}
-		}
+		ArticleEditorFuc("update", &rd, af)
 		rdJSON, _ := json.Marshal(rd)
 		c.Data["json"] = string(rdJSON)
 		c.ServeJSON()

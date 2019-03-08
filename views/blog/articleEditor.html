@@ -32,7 +32,9 @@
     <div id="div1" class="toolbar">
     </div>
     <div id="editor" class="text">
+        {{if .Article}}
         {{str2html .Article.ArticleContent.Content}}
+        {{end}}
         <!-- 文章内容区域 -->
     </div>
     <div class="input-group mb-3">
@@ -43,8 +45,12 @@
             <option selected >选择分类</option>
             {{$article := .Article}}
             {{range $index, $item := .typelist}}
-                {{if eq $article.ArticleType.Id $item.Id}}
-                    <option value="{{$item.Id}}" selected>{{$item.TypeName}}</option>
+                {{if $article }}
+                    {{if eq $article.ArticleType.Id $item.Id}}
+                        <option value="{{$item.Id}}" selected>{{$item.TypeName}}</option>
+                    {{else}}
+                        <option value="{{$item.Id}}">{{$item.TypeName}}</option>
+                    {{end}}
                 {{else}}
                     <option value="{{$item.Id}}">{{$item.TypeName}}</option>
                 {{end}}
