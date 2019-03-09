@@ -60,6 +60,7 @@ type articleForm struct {
 	ArticleContent string
 }
 
+// ArticleEditorFuc 文章编辑方法
 func ArticleEditorFuc(editorMod string, rd *ReturnData, af articleForm) {
 	o := orm.NewOrm()
 	o.Using("default")
