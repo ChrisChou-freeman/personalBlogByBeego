@@ -21,7 +21,7 @@ func (c *AdminController) IsLogin() bool {
 	return false
 }
 
-// Get 后台管理访问
+// Get 后台管理页面访问访问
 func (c *AdminController) Get() {
 	if isLogin := c.IsLogin(); !isLogin {
 		signinURL := c.URLFor("AccountController.Get")

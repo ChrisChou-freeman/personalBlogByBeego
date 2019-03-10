@@ -14,4 +14,5 @@ func init() {
 	beego.Router("/article_editor", &controllers.ArticleEditorController{})
 	beego.Router("/articleconten", &controllers.ArticleContentController{})
 	beego.Router("/admin", &controllers.AdminController{})
+	beego.Router("/adminjs", &controllers.AdminJsControllers{})
 }
