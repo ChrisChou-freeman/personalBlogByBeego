@@ -34,5 +34,6 @@ func (c *AdminController) Get() {
 		signinURL := c.URLFor("AccountController.Get")
 		c.Redirect(signinURL, 302)
 	}
+	c.Data["xsrf_token"] = c.XSRFToken()
 	c.TplName = "blog/admin.html"
 }

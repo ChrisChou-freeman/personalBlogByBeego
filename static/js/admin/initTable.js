@@ -11,38 +11,46 @@
 
     function bindSave() {
         $('#idSave').click(function () {
-            var postList = [];
-            //找到已经编辑过的tr，tr has-edit='true'
-            $('#table_tb').find('tr[has-edit="true"]').each(function () {
-                // $(this) => tr
-                var temp = {};
-                var id = $(this).attr('row-id');
-                temp['Id'] = id;
-                $(this).children('[edit-enable="true"]').each(function () {
-                    // $(this) = > td
-                    var name = $(this).attr('name');
-                    var origin = $(this).attr('origin');
-                    var newVal = $(this).attr('new-val');
-                    if (origin != newVal){
-                        temp[name] = newVal;
+            var hasEditorMod = $("#idEditMode").hasClass('btn-warning')
+            if (hasEditorMod){
+                alert("请先退出编辑模式");
+            }else{
+                var postList = [];
+                //找到已经编辑过的tr，tr has-edit='true'
+                $('#table_tb').find('tr[has-edit="true"]').each(function () {
+                    // $(this) => tr
+                    var temp = {};
+                    var id = $(this).attr('row-id');
+                    $(this).children('[edit-enable="true"]').each(function () {
+                        // $(this) = > td
+                        var name = $(this).attr('name');
+                        var origin = $(this).attr('origin');
+                        var newVal = $(this).attr('new-val');
+                        if (origin != newVal){
+                            temp['Id'] = id;
+                            temp[name] = newVal;
+                        }
+                    });
+                    if (JSON.stringify(temp) != "{}"){
+                        postList.push(temp);
                     }
-                });
-                postList.push(temp);
-            })
-
-            $.ajax({
-                url:requestUrl,
-                type: 'POST',
-                data: {'post_list': JSON.stringify(postList)},
-                dataType: 'JSON',
-                success:function (arg) {
-                    if(arg.status){
-                        init(1);
-                    }else{
-                        alert(arg.error);
+                })
+                console.log(postList)
+                $.ajax({
+                    url:requestUrl,
+                    type: 'POST',
+                    data: {'post_list': JSON.stringify(postList)},
+                    dataType: 'JSON',
+                    success:function (arg) {
+                        if(arg.status){
+                            init(1);
+                        }else{
+                            alert(arg.error);
+                        }
                     }
-                }
-            })
+                })
+            }
+            
         })
     }
 

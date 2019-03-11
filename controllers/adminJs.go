@@ -1,7 +1,10 @@
 package controllers
 
 import (
+	"MyblogByGo/models"
 	"encoding/json"
+	"fmt"
+	"strings"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
@@ -152,4 +155,72 @@ func (c *AdminJsControllers) Get() {
 	rdb, _ := json.Marshal(rd)
 	c.Data["json"] = string(rdb)
 	c.ServeJSON()
+}
+
+type adminArticleForm struct {
+	Id          int
+	ArticleName string
+	ArticleType int
+}
+
+type AdminUserForm struct {
+	Id       int
+	Name     string
+	PassWord string
+	About    string
+}
+
+func (af adminArticleForm) AdminArticleEditorFuc(rd *ReturnData) {
+	o := orm.NewOrm()
+	o.Using("default")
+	article := new(models.Article)
+	articleType := new(models.ArticleType)
+	articleName := af.ArticleName
+	articleName = strings.Replace(articleName, " ", "", -1)
+	if articleName == "" {
+		rd.Status = false
+		rd.Message = "文章标题为空"
+	}
+	if af.ArticleType != 0 {
+		articleType.Id = af.ArticleType
+		if err := o.Read(articleType); err != nil {
+			rd.Status = false
+			rd.Message = "文章类型错误"
+		}
+	} else {
+		rd.Status = false
+		rd.Message = "类型为空"
+	}
+	if rd.Status {
+		article.Id = af.Id
+		rerr := o.Read(article, "Id")
+		if rerr != nil {
+			fmt.Println(article.Id)
+			rd.Status = false
+			rd.Message = "找不到文章"
+		} else {
+			article.ArticleName = af.ArticleName
+			article.ArticleType = articleType
+			_, aerr := o.Update(article)
+			if aerr != nil {
+				rd.Status = false
+				rd.Message = "文章提交出错"
+				o.Rollback()
+			}
+		}
+	}
+}
+
+func (uf AdminUserForm) AdminUserEditorForm(rd *ReturnData) {
+
+}
+
+func (c *AdminJsControllers) Post() {
+	datatype := c.Input().Get("datatype")
+	o := orm.NewOrm()
+	o.Using("default")
+	switch {
+	case datatype == "article":
+
+	}
 }

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
+    <meta name="_xsrf" content="{{.xsrf_token}}" />
     <link rel="icon" href="/static/img/blog/UNADJUSTEDNONRAW_thumb_19a.jpg">
 
     <title>SpaceCowboyAdmin</title>
@@ -33,14 +34,14 @@
           <div class="sidebar-sticky">
             <ul class="nav flex-column">
               <li class="nav-item">
-                <a class='nav-link userbtn {{if eq .datatype "user"}}active{{end}}' href="/admin?datatype=user">
+                <a class='nav-link userbtn {{if .hasdatatype}}{{if eq .datatype "user"}}active{{end}}{{end}}' href="/admin?datatype=user">
                   <span data-feather="home"></span>
                   UserManage
                 </a>
               </li>
 
               <li class="nav-item">
-                  <a class='nav-link articlebtn {{if eq .datatype "article"}}active{{end}}' href="/admin?datatype=article">
+                  <a class='nav-link articlebtn {{if .hasdatatype}}{{if eq .datatype "article"}}active{{end}}{{end}}' href="/admin?datatype=article">
                     <span data-feather="file-text"></span>
                     ArticleManage
                   </a>
@@ -52,7 +53,7 @@
 
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-            <h1 class="h2 tableName">Dashboard</h1>
+            <h1 class="h2">DataTable</h1>
             <!-- <div class="btn-toolbar mb-2 mb-md-0">
               <div class="btn-group mr-2">
                 <button class="btn btn-sm btn-outline-secondary">Share</button>
@@ -102,6 +103,25 @@
     <script src="/static/js/admin/initTable.js"></script>
     <script>
       feather.replace()
+      var ajax = $.ajax;
+      $.extend({
+          ajax: function(url, options) {
+              if (typeof url === 'object') {
+                  options = url;
+                  url = undefined;
+              }
+              options = options || {};
+              url = options.url;
+              var xsrftoken = $('meta[name=_xsrf]').attr('content');
+              var headers = options.headers || {};
+              var domain = document.domain.replace(/\./ig, '\\.');
+              if (!/^(http:|https:).*/.test(url) || eval('/^(http:|https:)\\/\\/(.+\\.)*' + domain + '.*/').test(url)) {
+                  headers = $.extend(headers, {'X-Xsrftoken':xsrftoken});
+              }
+              options.headers = headers;
+              return ajax(url, options);
+          }
+      });
     </script>
 
     <!-- TableData -->
