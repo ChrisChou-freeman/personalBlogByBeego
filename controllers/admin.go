@@ -23,6 +23,13 @@ func (c *AdminController) IsLogin() bool {
 
 // Get 后台管理页面访问访问
 func (c *AdminController) Get() {
+	dataType := c.Input().Get("datatype")
+	hasdatatype := false
+	if dataType != "" {
+		c.Data["datatype"] = dataType
+		hasdatatype = true
+	}
+	c.Data["hasdatatype"] = hasdatatype
 	if isLogin := c.IsLogin(); !isLogin {
 		signinURL := c.URLFor("AccountController.Get")
 		c.Redirect(signinURL, 302)

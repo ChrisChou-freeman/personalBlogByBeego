@@ -33,14 +33,14 @@
           <div class="sidebar-sticky">
             <ul class="nav flex-column">
               <li class="nav-item">
-                <a class="nav-link userbtn" href="#">
+                <a class='nav-link userbtn {{if eq .datatype "user"}}active{{end}}' href="/admin?datatype=user">
                   <span data-feather="home"></span>
                   UserManage
                 </a>
               </li>
 
               <li class="nav-item">
-                  <a class="nav-link articlebtn" href="#">
+                  <a class='nav-link articlebtn {{if eq .datatype "article"}}active{{end}}' href="/admin?datatype=article">
                     <span data-feather="file-text"></span>
                     ArticleManage
                   </a>
@@ -66,13 +66,13 @@
           </div>
 
           <div class="btn-group btnbox" role="group" aria-label="...">
-              <!-- <button id="idCheckAll" type="button" class="btn btn-secondary">全选</button>
+              <button id="idCheckAll" type="button" class="btn btn-secondary">全选</button>
               <button id="idReverseAll" type="button" class="btn btn-secondary">反选</button>
               <button id="idCancelAll" type="button" class="btn btn-secondary">取消</button>
               <button id="idEditMode" type="button" class="btn btn-secondary">进入编辑模式</button>
               <button type="button" class="btn btn-secondary">批量删除</button>
               <button id="idSave" type="button" class="btn btn-secondary">保存</button>
-              <a id="idAdd" href="#" class="btn btn-secondary">添加</a> -->
+              <a id="idAdd" href="#" class="btn btn-secondary">添加</a>
           </div>
           <!-- <canvas class="my-4" id="myChart" width="900" height="380"></canvas> -->
          
@@ -105,39 +105,10 @@
     </script>
 
     <!-- TableData -->
-    <script>
-      // var checkAll =  document.createElement("button")
-      // checkAll.className = "btn btn-secondary"
-      // checkAll.id = "idCheckAll"
-      // checkAll.type = "button"
-      // var ReverseAll = document.createElement("button")
-      // ReverseAll.className = "btn btn-secondary"
-      // ReverseAll.id = "idReverseAll"
-      // var CancelAll = document
-      var button_str = 
-              '<button id="idCheckAll" type="button" class="btn btn-secondary">全选</button>' +
-              '<button id="idReverseAll" type="button" class="btn btn-secondary">反选</button>' +
-              '<button id="idCancelAll" type="button" class="btn btn-secondary">取消</button>' +
-              '<button id="idEditMode" type="button" class="btn btn-secondary">进入编辑模式</button>' +
-              '<button type="button" class="btn btn-secondary">批量删除</button>' +
-              '<button id="idSave" type="button" class="btn btn-secondary">保存</button>' +
-              '<a id="idAdd" href="#" class="btn btn-secondary">添加</a>'
-      $(".userbtn").click(function(){
-        $('.btnbox').empty()
-        $(".btnbox").append(button_str)
-        $(this).addClass("active")
-        $(this).parent().siblings().find("a").removeClass("active")
-        $(".tableName").text("User")
-        $.initTable('{{urlfor "AdminJsControllers.Get"}}?datatype=user')
-      })
-      $(".articlebtn").click(function(){
-        $('.btnbox').empty()
-        $(".btnbox").append(button_str)
-        $(this).addClass("active")
-        $(this).parent().siblings().find("a").removeClass("active")
-        $(".tableName").text("Article")
-        $.initTable('{{urlfor "AdminJsControllers.Get"}}?datatype=article')
-      })
-    </script>
+      {{if .hasdatatype}}
+      <script>
+        $.initTable('{{urlfor "AdminJsControllers.Get"}}?datatype={{.datatype}}')
+      </script>
+      {{end}}
   </body>
 </html>
