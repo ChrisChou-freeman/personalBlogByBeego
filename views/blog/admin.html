@@ -20,7 +20,7 @@
   <body>
     <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
       <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="/">SpaceCowboy</a>
-      <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
+      <!-- <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search"> -->
       <ul class="navbar-nav px-3">
         <li class="nav-item text-nowrap">
           <a class="nav-link" href='{{urlfor "SignOutController.Get"}}'>Sign out</a>
@@ -54,16 +54,6 @@
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
             <h1 class="h2">DataTable</h1>
-            <!-- <div class="btn-toolbar mb-2 mb-md-0">
-              <div class="btn-group mr-2">
-                <button class="btn btn-sm btn-outline-secondary">Share</button>
-                <button class="btn btn-sm btn-outline-secondary">Export</button>
-              </div>
-              <button class="btn btn-sm btn-outline-secondary dropdown-toggle">
-                <span data-feather="calendar"></span>
-                This week
-              </button>
-            </div> -->
           </div>
 
           <div class="btn-group btnbox" role="group" aria-label="...">
@@ -73,7 +63,6 @@
               <button id="idEditMode" type="button" class="btn btn-secondary">进入编辑模式</button>
               <button type="button" class="btn btn-secondary">批量删除</button>
               <button id="idSave" type="button" class="btn btn-secondary">保存</button>
-              <a id="idAdd" href="#" class="btn btn-secondary">添加</a>
           </div>
           <!-- <canvas class="my-4" id="myChart" width="900" height="380"></canvas> -->
          
@@ -85,6 +74,10 @@
               </tbody>
             </table>
           </div>
+          <nav aria-label="Page navigation example">
+            <ul class="pagination" id="idPagination">
+            </ul>
+          </nav>
         </main>
       </div>
     </div>

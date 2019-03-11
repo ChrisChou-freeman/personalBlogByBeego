@@ -2,8 +2,12 @@ package controllers
 
 import (
 	"MyblogByGo/models"
+	"MyblogByGo/tools"
+	"crypto/sha512"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/astaxie/beego"
@@ -118,9 +122,16 @@ func (c *AdminJsControllers) Get() {
 		GlobalDict  map[string][]orm.ParamsList
 		Pager       string
 	}
-	rd := ReturnData{}
 	o := orm.NewOrm()
 	o.Using("default")
+	pager := c.GetString("pater")
+	dataCount, _ := o.QueryTable("Article").Count()
+	pagernum, perr := strconv.Atoi(pager)
+	if perr != nil {
+		pagernum = 1
+	}
+	pageLimit, start, stop := tools.LimitPage(pagernum, int(dataCount), "", "#")
+	rd := ReturnData{}
 	dataList := []orm.Params{}
 	tableName := ""
 	dataType := c.Input().Get("datatype")
@@ -143,8 +154,11 @@ func (c *AdminJsControllers) Get() {
 				qList = append(qList, item.Q)
 			}
 		}
-		_, err := o.QueryTable(tableName).Values(&dataList, qList...)
+		qs := o.QueryTable(tableName)
+		qs.Limit(stop, start)
+		_, err := qs.Values(&dataList, qList...)
 		if err == nil {
+			rd.Pager = pageLimit
 			rd.DataList = dataList
 		} else {
 			rd.DataList = []orm.Params{}
@@ -160,7 +174,7 @@ func (c *AdminJsControllers) Get() {
 type adminArticleForm struct {
 	Id          int
 	ArticleName string
-	ArticleType int
+	ArticleType string
 }
 
 type AdminUserForm struct {
@@ -177,19 +191,17 @@ func (af adminArticleForm) AdminArticleEditorFuc(rd *ReturnData) {
 	articleType := new(models.ArticleType)
 	articleName := af.ArticleName
 	articleName = strings.Replace(articleName, " ", "", -1)
-	if articleName == "" {
+	articleTypeId, converr := strconv.Atoi(af.ArticleType)
+	if converr != nil {
 		rd.Status = false
-		rd.Message = "文章标题为空"
+		rd.Message = "文章类型错误"
 	}
-	if af.ArticleType != 0 {
-		articleType.Id = af.ArticleType
+	if articleTypeId != 0 {
+		articleType.Id = articleTypeId
 		if err := o.Read(articleType); err != nil {
 			rd.Status = false
 			rd.Message = "文章类型错误"
 		}
-	} else {
-		rd.Status = false
-		rd.Message = "类型为空"
 	}
 	if rd.Status {
 		article.Id = af.Id
@@ -199,8 +211,12 @@ func (af adminArticleForm) AdminArticleEditorFuc(rd *ReturnData) {
 			rd.Status = false
 			rd.Message = "找不到文章"
 		} else {
-			article.ArticleName = af.ArticleName
-			article.ArticleType = articleType
+			if articleName != "" {
+				article.ArticleName = af.ArticleName
+			}
+			if articleTypeId != 0 {
+				article.ArticleType = articleType
+			}
 			_, aerr := o.Update(article)
 			if aerr != nil {
 				rd.Status = false
@@ -211,16 +227,81 @@ func (af adminArticleForm) AdminArticleEditorFuc(rd *ReturnData) {
 	}
 }
 
+// AdminUserEditorForm 后台用户更新方法
 func (uf AdminUserForm) AdminUserEditorForm(rd *ReturnData) {
+	o := orm.NewOrm()
+	o.Using("default")
+	User := new(models.User)
+	username := uf.Name
+	username = strings.Replace(username, " ", "", -1)
+	password := uf.PassWord
+	password = strings.Replace(password, " ", "", -1)
+	about := uf.About
+	about = strings.Replace(about, " ", "", -1)
+	//about := uf.About
+	if rd.Status {
+		User.Id = uf.Id
+		rerr := o.Read(User, "Id")
+		if rerr != nil {
+			rd.Status = false
+			rd.Message = "找不到用户"
+		} else {
+			if username != "" {
+				User.Name = uf.Name
+			}
+			if password != "" {
+				myHs := sha512.New()
+				myHs.Write([]byte(uf.PassWord))
+				myHasPas := myHs.Sum(nil)
+				encodedPss := base64.StdEncoding.EncodeToString([]byte(myHasPas))
+				User.PassWord = encodedPss
+			}
+			if about != "" {
+				User.About = about
+			}
+			_, uerr := o.Update(User)
+			if uerr != nil {
+				rd.Status = false
+				rd.Message = "用户更新出错"
+				o.Rollback()
+			}
+		}
 
+	}
 }
 
 func (c *AdminJsControllers) Post() {
 	datatype := c.Input().Get("datatype")
 	o := orm.NewOrm()
 	o.Using("default")
+	rd := ReturnData{Status: true}
+	datalist := c.GetString("post_list")
+	fmt.Println(datalist)
 	switch {
 	case datatype == "article":
-
+		af := []adminArticleForm{}
+		if err := json.Unmarshal([]byte(datalist), &af); err != nil {
+			fmt.Println(datalist)
+			fmt.Println(err)
+			rd.Status = false
+			rd.Message = "文章更改出错"
+		} else {
+			for _, item := range af {
+				item.AdminArticleEditorFuc(&rd)
+			}
+		}
+	case datatype == "user":
+		uf := []AdminUserForm{}
+		if err := json.Unmarshal([]byte(datalist), &uf); err != nil {
+			rd.Status = false
+			rd.Message = "文章更改出错"
+		} else {
+			for _, item := range uf {
+				item.AdminUserEditorForm(&rd)
+			}
+		}
 	}
+	rdJSON, _ := json.Marshal(rd)
+	c.Data["json"] = string(rdJSON)
+	c.ServeJSON()
 }

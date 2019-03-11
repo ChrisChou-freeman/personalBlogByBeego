@@ -5,7 +5,6 @@
         $('#idPagination').on('click','a',function () {
             var num = $(this).text();
             init(num);
-
         })
     }
 
@@ -27,7 +26,7 @@
                         var origin = $(this).attr('origin');
                         var newVal = $(this).attr('new-val');
                         if (origin != newVal){
-                            temp['Id'] = id;
+                            temp['Id'] = Number(id);
                             temp[name] = newVal;
                         }
                     });
@@ -42,10 +41,12 @@
                     data: {'post_list': JSON.stringify(postList)},
                     dataType: 'JSON',
                     success:function (arg) {
-                        if(arg.status){
+                        arg  = JSON.parse(arg)
+                        console.log(arg)
+                        if(arg.Status){
                             init(1);
                         }else{
-                            alert(arg.error);
+                            alert(arg.Message);
                         }
                     }
                 })
@@ -247,6 +248,7 @@
     }
     function initPager(pager){
         $('#idPagination').html(pager);
+        $('#idPagination').find("a").prop("href", "#")
     }
 
     function initHeader(table_config) {
