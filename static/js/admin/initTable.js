@@ -32,7 +32,7 @@
 
             $.ajax({
                 url:requestUrl,
-                type: 'PUT',
+                type: 'POST',
                 data: {'post_list': JSON.stringify(postList)},
                 dataType: 'JSON',
                 success:function (arg) {
@@ -215,8 +215,6 @@
     }
 
     String.prototype.format = function (kwargs) {
-        // this ="laiying: {age} - {gender}";
-        // kwargs =  {'age':18,'gender': '女'}
         var ret = this.replace(/\{(\w+)\}/g,function (km,m) {
             return kwargs[m];
         });

@@ -3,9 +3,8 @@ package controllers
 import (
 	"encoding/json"
 
-	"github.com/astaxie/beego/orm"
-
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/orm"
 )
 
 // AdminJsControllers 后台js事件处理
@@ -61,39 +60,94 @@ func GetTableConfig(tablename string) []TableConfigArg {
 			Attrs:   map[string]string{},
 		},
 	}
-	if tablename == "article" {
-		return ArticleTableConfig
+	UserTableConfig := []TableConfigArg{
+		{
+			Q:       "",
+			Title:   "选项",
+			Display: true,
+			Text:    map[string]string{"content": "<input type='checkbox' />", "kwargs": "{}"},
+			Attrs:   map[string]string{},
+		},
+		{
+			Q:       "Id",
+			Title:   "ID",
+			Display: true,
+			Text:    map[string]string{"content": "{n}", "kwargs": `{"n": "@Id"}`},
+			Attrs:   map[string]string{},
+		},
+		{
+			Q:       "Name",
+			Title:   "用户名",
+			Display: true,
+			Text:    map[string]string{"content": "{n}", "kwargs": `{"n": "@Name"}`},
+			Attrs:   map[string]string{"name": "Name", "origin": "@Name", "edit-enable": "true", "edit-type": "input"},
+		},
+		{
+			Q:       "PassWord",
+			Title:   "密码",
+			Display: true,
+			Text:    map[string]string{"content": "{n}", "kwargs": `{"n": "@PassWord"}`},
+			Attrs:   map[string]string{"name": "PassWord", "origin": "@PassWord", "edit-enable": "true", "edit-type": "input"},
+		},
+		{
+			Q:       "About",
+			Title:   "关于",
+			Display: true,
+			Text:    map[string]string{"content": "{n}", "kwargs": `{"n": "@About"}`},
+			Attrs:   map[string]string{"name": "About", "origin": "@About", "edit-enable": "true", "edit-type": "input"},
+		},
 	}
-	return ArticleTableConfig
+	var tableConfig []TableConfigArg
+	switch {
+	case tablename == "article":
+		tableConfig = ArticleTableConfig
+	case tablename == "user":
+		tableConfig = UserTableConfig
+	}
+	return tableConfig
 }
 
 // Get js Get 方法
 func (c *AdminJsControllers) Get() {
-	TableConfig := GetTableConfig("article")
-	//b, _ := json.Marshal(TableConfig)
-	dataList := []orm.Params{}
-	qList := []string{}
-	for _, item := range TableConfig {
-		if item.Q != "" {
-			qList = append(qList, item.Q)
-		}
-	}
-	o := orm.NewOrm()
-	o.Using("default")
-	o.QueryTable("Article").Values(&dataList, qList...)
-	articleTypeList := []orm.ParamsList{}
-	o.QueryTable("ArticleType").ValuesList(&articleTypeList, "Id", "TypeName")
 	type ReturnData struct {
 		TableConfig []TableConfigArg
 		DataList    []orm.Params
 		GlobalDict  map[string][]orm.ParamsList
 		Pager       string
 	}
-	rd := ReturnData{
-		TableConfig: TableConfig,
-		DataList:    dataList,
-		GlobalDict:  map[string][]orm.ParamsList{"ArticleType": articleTypeList},
-		Pager:       "",
+	rd := ReturnData{}
+	o := orm.NewOrm()
+	o.Using("default")
+	dataList := []orm.Params{}
+	tableName := ""
+	dataType := c.Input().Get("datatype")
+	if dataType == "article" {
+		tableName = "Article"
+		articleTypeList := []orm.ParamsList{}
+		o.QueryTable("ArticleType").ValuesList(&articleTypeList, "Id", "TypeName")
+		rd.GlobalDict = map[string][]orm.ParamsList{"ArticleType": articleTypeList}
+	} else if dataType == "user" {
+		tableName = "User"
+	} else {
+		rd.GlobalDict = map[string][]orm.ParamsList{}
+	}
+	TableConfig := GetTableConfig(dataType)
+	rd.TableConfig = TableConfig
+	if tableName != "" {
+		qList := []string{}
+		for _, item := range TableConfig {
+			if item.Q != "" {
+				qList = append(qList, item.Q)
+			}
+		}
+		_, err := o.QueryTable(tableName).Values(&dataList, qList...)
+		if err == nil {
+			rd.DataList = dataList
+		} else {
+			rd.DataList = []orm.Params{}
+		}
+	} else {
+		rd.DataList = []orm.Params{}
 	}
 	rdb, _ := json.Marshal(rd)
 	c.Data["json"] = string(rdb)

@@ -33,14 +33,14 @@
           <div class="sidebar-sticky">
             <ul class="nav flex-column">
               <li class="nav-item">
-                <a class="nav-link active" href="#">
+                <a class="nav-link userbtn" href="#">
                   <span data-feather="home"></span>
                   UserManage
                 </a>
               </li>
 
               <li class="nav-item">
-                  <a class="nav-link" href="#">
+                  <a class="nav-link articlebtn" href="#">
                     <span data-feather="file-text"></span>
                     ArticleManage
                   </a>
@@ -52,7 +52,7 @@
 
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-            <h1 class="h2">Dashboard</h1>
+            <h1 class="h2 tableName">Dashboard</h1>
             <!-- <div class="btn-toolbar mb-2 mb-md-0">
               <div class="btn-group mr-2">
                 <button class="btn btn-sm btn-outline-secondary">Share</button>
@@ -65,14 +65,14 @@
             </div> -->
           </div>
 
-          <div class="btn-group" role="group" aria-label="...">
-              <button id="idCheckAll" type="button" class="btn btn-secondary">全选</button>
+          <div class="btn-group btnbox" role="group" aria-label="...">
+              <!-- <button id="idCheckAll" type="button" class="btn btn-secondary">全选</button>
               <button id="idReverseAll" type="button" class="btn btn-secondary">反选</button>
               <button id="idCancelAll" type="button" class="btn btn-secondary">取消</button>
               <button id="idEditMode" type="button" class="btn btn-secondary">进入编辑模式</button>
               <button type="button" class="btn btn-secondary">批量删除</button>
               <button id="idSave" type="button" class="btn btn-secondary">保存</button>
-              <a id="idAdd" href="#" class="btn btn-secondary">添加</a>
+              <a id="idAdd" href="#" class="btn btn-secondary">添加</a> -->
           </div>
           <!-- <canvas class="my-4" id="myChart" width="900" height="380"></canvas> -->
          
@@ -106,7 +106,38 @@
 
     <!-- TableData -->
     <script>
-      $.initTable('{{urlfor "AdminJsControllers.Get"}}')
+      // var checkAll =  document.createElement("button")
+      // checkAll.className = "btn btn-secondary"
+      // checkAll.id = "idCheckAll"
+      // checkAll.type = "button"
+      // var ReverseAll = document.createElement("button")
+      // ReverseAll.className = "btn btn-secondary"
+      // ReverseAll.id = "idReverseAll"
+      // var CancelAll = document
+      var button_str = 
+              '<button id="idCheckAll" type="button" class="btn btn-secondary">全选</button>' +
+              '<button id="idReverseAll" type="button" class="btn btn-secondary">反选</button>' +
+              '<button id="idCancelAll" type="button" class="btn btn-secondary">取消</button>' +
+              '<button id="idEditMode" type="button" class="btn btn-secondary">进入编辑模式</button>' +
+              '<button type="button" class="btn btn-secondary">批量删除</button>' +
+              '<button id="idSave" type="button" class="btn btn-secondary">保存</button>' +
+              '<a id="idAdd" href="#" class="btn btn-secondary">添加</a>'
+      $(".userbtn").click(function(){
+        $('.btnbox').empty()
+        $(".btnbox").append(button_str)
+        $(this).addClass("active")
+        $(this).parent().siblings().find("a").removeClass("active")
+        $(".tableName").text("User")
+        $.initTable('{{urlfor "AdminJsControllers.Get"}}?datatype=user')
+      })
+      $(".articlebtn").click(function(){
+        $('.btnbox').empty()
+        $(".btnbox").append(button_str)
+        $(this).addClass("active")
+        $(this).parent().siblings().find("a").removeClass("active")
+        $(".tableName").text("Article")
+        $.initTable('{{urlfor "AdminJsControllers.Get"}}?datatype=article')
+      })
     </script>
   </body>
 </html>
