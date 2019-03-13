@@ -43,9 +43,11 @@ func (c *AccountController) Post() {
 		if err == orm.ErrNoRows {
 			fmt.Println("查询不到用户:", user.Name)
 			c.Data["errmsg"] = "找不到用户"
+			c.Data["xsrfdata"] = template.HTML(c.XSRFFormHTML())
 			c.TplName = "blog/signin.html"
 		} else if err == orm.ErrMissPK {
 			fmt.Println("找不到主键")
+			c.Data["xsrfdata"] = template.HTML(c.XSRFFormHTML())
 			c.TplName = "blog/signin.html"
 		} else {
 			ufpass := uf.Pass

@@ -29,7 +29,8 @@ type TableConfigArg struct {
 }
 
 // GetTableConfig Admin 数据表格配置
-func GetTableConfig(tablename string) []TableConfigArg {
+func GetTableConfig(tablename string, c *AdminJsControllers) []TableConfigArg {
+	aEditorUrl := c.URLFor("ArticleEditorController.Get")
 	ArticleTableConfig := []TableConfigArg{
 		{
 			Q:       "",
@@ -63,7 +64,7 @@ func GetTableConfig(tablename string) []TableConfigArg {
 			Q:       "",
 			Title:   "操作",
 			Display: true,
-			Text:    map[string]string{"content": "<a href='/assetdetail-{m}.html'>{n}</a>", "kwargs": `{"n": "文章","m": "@id"}`},
+			Text:    map[string]string{"content": "<a href='" + aEditorUrl + "?articleid={m}'>{n}</a>", "kwargs": `{"n": "文章","m": "@Id"}`},
 			Attrs:   map[string]string{},
 		},
 	}
@@ -145,7 +146,7 @@ func (c *AdminJsControllers) Get() {
 	} else {
 		rd.GlobalDict = map[string][]orm.ParamsList{}
 	}
-	TableConfig := GetTableConfig(dataType)
+	TableConfig := GetTableConfig(dataType, c)
 	rd.TableConfig = TableConfig
 	if tableName != "" {
 		qList := []string{}
