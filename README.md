@@ -12,6 +12,7 @@
 ```
 //执行
 go get github.com/astaxie/beego
+go get github.com/beego/bee
 go get github.com/astaxie/beego/session/mysql
 go get github.com/go-sql-driver/mysql
 ```
@@ -35,3 +36,9 @@ go run main.go  initSession
 ```
 
 其余数据库连接相关配置在conf/app.conf中的# self config下面自行修改
+
+启动项目
+```
+go run main.go
+//默认启动在127.0.0.1:8000端口
+```
