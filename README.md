@@ -3,6 +3,7 @@
 个人博客网站用beego框架实现
 -------
 ![博客样式](https://github.com/chrischou2018/personalBlogByBeego/raw/master/static/img/blog/blogimg.png)
+![后台样式](https://github.com/chrischou2018/personalBlogByBeego/raw/master/static/img/blog/adminimg.png)
 依赖库
 ```
 //执行
