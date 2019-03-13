@@ -43,7 +43,7 @@ func initTags() {
 // initUser 初始化管理员
 func initUser() {
 	user := new(models.User)
-	user.Name = "cris"
+	user.Name = "chris"
 	userpass := "admin123"
 	myHs := sha512.New()
 	myHs.Write([]byte(userpass))
