@@ -6,6 +6,7 @@
 依赖库
 ```
 //执行
+go get github.com/astaxie/beego
 go get github.com/astaxie/beego/session/mysql
 go get github.com/go-sql-driver/mysql
 ```
