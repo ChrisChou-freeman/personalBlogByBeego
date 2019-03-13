@@ -12,8 +12,9 @@ import (
 )
 
 var commandMaps = map[string]func(){
-	"initTags": initTags,
-	"initUser": initUser,
+	"initTags":    initTags,
+	"initUser":    initUser,
+	"initSession": initSessionTable,
 }
 
 // initTags 初始化标签函数
@@ -37,7 +38,6 @@ func initTags() {
 			}
 		}
 	}
-	os.Exit(0)
 }
 
 // initUser 初始化管理员
@@ -57,15 +57,30 @@ func initUser() {
 	} else {
 		fmt.Println("error:", err)
 	}
-	os.Exit(0)
+}
+
+func initSessionTable() {
+	o := orm.NewOrm()
+	o.Using("default")
+	sqlstr := "CREATE TABLE `session` " +
+		"(`session_key` char(64) NOT NULL,`session_data` blob, `session_expiry` int(11) unsigned NOT NULL,PRIMARY KEY (`session_key`)) " +
+		"ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+	r := o.Raw(sqlstr)
+	_, cerr := r.Exec()
+	if cerr == nil {
+		fmt.Println("session table create success")
+	} else {
+		fmt.Println("session table create err:", cerr)
+	}
 }
 
 // Mycommands 自定义命令
 func Mycommands(com func()) {
 	if len(os.Args) < 2 {
 		return
-	} else if elm, ok := commandMaps[os.Args[1]]; ok {
-		elm()
+	} else if mcom, ok := commandMaps[os.Args[1]]; ok {
+		mcom()
+		os.Exit(0)
 	} else {
 		com()
 	}
