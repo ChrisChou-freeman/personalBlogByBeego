@@ -2,7 +2,7 @@
 
 个人博客网站用beego框架实现
 -------
-
+![博客样式](https://github.com/chrischou2018/personalBlogByBeego/raw/master/static/img/blog/blogimg.png)
 依赖库
 ```
 //执行
@@ -18,9 +18,10 @@ go run main.go initUser
 // 初始化的用户名密码可以在tools/commands.go下修改
 ```
 
-初始化分类标签
+初始化类型标签
 ```
 go run main.go  initTags
+// 初始化博客类型分类可以在tools/commands.go下修改
 ```
 
 初始化session表
