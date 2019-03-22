@@ -6,6 +6,7 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"github.com/go-sql-driver/mysql"
 )
 
 //User 用户表
@@ -41,15 +42,23 @@ type ArticleType struct {
 
 func init() {
 	orm.RegisterModel(new(User), new(Article), new(ArticleContent), new(ArticleType))
-	sqlname, _ := beego.GetConfig("String", "sqlname", "myblogbygo")
-	dbname, _ := beego.GetConfig("String", "dbname", "mysql")
+	sqlname, _ := beego.GetConfig("String", "sqlname", "mysql")
+	dbname, _ := beego.GetConfig("String", "dbname", "myblogbygo")
 	sqluser, _ := beego.GetConfig("String", "sqluser", "root")
 	sqlpass, _ := beego.GetConfig("String", "sqlpass", "123")
 	sqlhost, _ := beego.GetConfig("String", "sqlhost", "127.0.0.1")
 	sqlport, _ := beego.GetConfig("String", "sqlport", "3306")
-	verification := "%s:%s@tcp(%s:%s)/%s?charset=utf8"
-	verificationStr := fmt.Sprintf(verification, sqluser, sqlpass, sqlhost, sqlport, dbname)
-	verificationStr += "&loc=Asia%2FShanghai"
+	dbConfig := mysql.NewConfig()
+	dbConfig.User = sqluser.(string)
+	dbConfig.Passwd = sqlpass.(string)
+	dbConfig.Addr = sqlhost.(string) + ":" + sqlport.(string)
+	dbConfig.DBName = dbname.(string)
+	l, _ := time.LoadLocation("Asia/Shanghai")
+	dbConfig.Loc = l
+	dbConfig.Net = "tcp"
 	orm.RegisterDriver(sqlname.(string), orm.DRMySQL)
-	orm.RegisterDataBase("default", sqlname.(string), verificationStr)
+	err := orm.RegisterDataBase("default", sqlname.(string), dbConfig.FormatDSN())
+	if err != nil {
+		fmt.Println(err)
+	}
 }
