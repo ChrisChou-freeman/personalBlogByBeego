@@ -17,6 +17,11 @@ go get github.com/astaxie/beego/session/mysql
 go get github.com/go-sql-driver/mysql
 ```
 
+初始化数据库表
+```
+go run main.go orm syncdb
+```
+
 初始化管理员账户
 ```
 //执行命令

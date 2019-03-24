@@ -53,8 +53,8 @@ func init() {
 	dbConfig.Passwd = sqlpass.(string)
 	dbConfig.Addr = sqlhost.(string) + ":" + sqlport.(string)
 	dbConfig.DBName = dbname.(string)
-	l, _ := time.LoadLocation("Asia/Shanghai")
-	dbConfig.Loc = l
+	// l, _ := time.LoadLocation("Asia/Shanghai")
+	// dbConfig.Loc = l
 	dbConfig.Net = "tcp"
 	orm.RegisterDriver(sqlname.(string), orm.DRMySQL)
 	err := orm.RegisterDataBase("default", sqlname.(string), dbConfig.FormatDSN())
