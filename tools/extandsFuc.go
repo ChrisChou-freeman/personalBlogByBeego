@@ -35,7 +35,7 @@ func LimitPage(CurreentPage, AllCount int, FilterArgs, url string) (string, int,
 			stop = showPage
 		} else {
 			if CurreentPage >= allPage-pageHalf {
-				start = allPage - 10
+				start = allPage - showPage
 				stop = allPage
 			} else {
 				start = CurreentPage - pageHalf

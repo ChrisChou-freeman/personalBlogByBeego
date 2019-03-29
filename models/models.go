@@ -58,6 +58,7 @@ func init() {
 	dbConfig.Net = "tcp"
 	orm.RegisterDriver(sqlname.(string), orm.DRMySQL)
 	err := orm.RegisterDataBase("default", sqlname.(string), dbConfig.FormatDSN())
+	fmt.Println(dbConfig.FormatDSN())
 	if err != nil {
 		fmt.Println(err)
 	}
