@@ -7,12 +7,12 @@ import (
 )
 
 func init() {
-	beego.Router("/", &controllers.IndexController{})
-	beego.Router("/signin", &controllers.AccountController{})
-	beego.Router("/signout", &controllers.SignOutController{})
-	beego.Router("/article_add", &controllers.ArticleAddController{})
+	beego.Router("/", 				&controllers.IndexController{})
+	beego.Router("/signin", 		&controllers.AccountController{})
+	beego.Router("/signout", 		&controllers.SignOutController{})
+	beego.Router("/article_add", 	&controllers.ArticleAddController{})
 	beego.Router("/article_editor", &controllers.ArticleEditorController{})
-	beego.Router("/articleconten", &controllers.ArticleContentController{})
-	beego.Router("/admin", &controllers.AdminController{})
-	beego.Router("/adminjs", &controllers.AdminJsControllers{})
+	beego.Router("/articleconten", 	&controllers.ArticleContentController{})
+	beego.Router("/admin", 			&controllers.AdminController{})
+	beego.Router("/adminjs", 		&controllers.AdminJsControllers{})
 }
