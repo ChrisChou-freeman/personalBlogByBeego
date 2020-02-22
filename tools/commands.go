@@ -8,7 +8,7 @@ import (
 
 	"github.com/astaxie/beego/orm"
 
-	"MyblogByGo/models"
+	"personalBlogByBeego/models"
 )
 
 var commandMaps = map[string]func(){

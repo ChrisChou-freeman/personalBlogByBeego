@@ -8,9 +8,9 @@ import (
 	_ "github.com/astaxie/beego/session/mysql"
 	_ "github.com/go-sql-driver/mysql"
 
-	_ "MyblogByGo/models"
-	_ "MyblogByGo/routers"
-	"MyblogByGo/tools"
+	_ "personalBlogByBeego/models"
+	_ "personalBlogByBeego/routers"
+	"personalBlogByBeego/tools"
 )
 
 func init() {
